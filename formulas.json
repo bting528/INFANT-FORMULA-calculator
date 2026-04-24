@@ -1,0 +1,13 @@
+{
+  "Standard Stage 1 (C20)": {"kcal_100ml": 67, "pro_100ml": 1.3, "cho_100ml": 7.0, "scoop_g": 4.4},
+  "Enfamil A+ Step Up care (C22)": {"kcal_100ml": 74, "pro_100ml": 2.1, "cho_100ml": 7.7, "scoop_g": 4.9},
+  "Frisolac Premature RTF (C24)": {"kcal_100ml": 81, "pro_100ml": 2.4, "cho_100ml": 8.9, "scoop_g": 0.0, "is_rtf": true},
+  "Infatrini <1yr (C30)": {"kcal_100ml": 101, "pro_100ml": 2.6, "cho_100ml": 10.3, "scoop_g": 5.0},
+  "Nutren Junior >1yr (C30)": {"kcal_100ml": 100, "pro_100ml": 3.0, "cho_100ml": 11.0, "scoop_g": 7.9},
+  "Pepti-Junior <1yr (C20)": {"kcal_100ml": 67, "pro_100ml": 1.8, "cho_100ml": 6.8, "scoop_g": 4.5},
+  "Peptamen Junior >1yr (C30)": {"kcal_100ml": 100, "pro_100ml": 3.0, "cho_100ml": 11.0, "scoop_g": 8.0},
+  "Neocate LCP (C20)": {"kcal_100ml": 67, "pro_100ml": 1.8, "cho_100ml": 7.2, "scoop_g": 4.6},
+  "Isomil (C20)": {"kcal_100ml": 67, "pro_100ml": 1.7, "cho_100ml": 6.8, "scoop_g": 4.4},
+  "Frisolac Gold Comfort (C20)": {"kcal_100ml": 67, "pro_100ml": 1.4, "cho_100ml": 7.0, "scoop_g": 4.3},
+  "Enfamil A+ LactoFree Care": {"kcal_100ml": 67, "pro_100ml": 1.4, "cho_100ml": 7.2, "scoop_g": 4.3}
+}
