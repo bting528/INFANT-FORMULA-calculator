@@ -1,7 +1,7 @@
 <!DOCTYPE html>
 <html>
 <head>
-    <title>HK Clinical Calc v3.3</title>
+    <title>HK Clinical Calc v3.4</title>
     <meta name="viewport" content="width=device-width, initial-scale=1">
     <style>
         body { font-family: -apple-system, sans-serif; padding: 15px; max-width: 1000px; margin: auto; background: #f0f2f5; color: #333; }
@@ -18,7 +18,7 @@
         .alert { color: #d32f2f !important; border-color: #d32f2f !important; font-weight: 900; }
         .concentration-box { display: flex; gap: 10px; margin-top: 10px; }
         .conc-item { flex: 1; padding: 8px; border-radius: 6px; text-align: center; font-size: 0.85em; font-weight: bold; border: 1px solid #ddd; background: white; }
-        .mod-load { font-size: 0.75em; color: #777; margin-top: 5px; font-style: italic; text-align: right; }
+        .mod-load { font-size: 0.75em; color: #777; margin-top: 8px; font-style: italic; text-align: right; }
         .gir-box { background: #fff3e0; border-left: 5px solid #ff9800; padding: 8px; margin-top: 10px; font-size: 0.9em; }
         .weight-section { width: 100%; margin-bottom: 15px; background: #0056b3; padding: 15px; border-radius: 12px; color: white; }
     </style>
@@ -77,6 +77,9 @@
                 <option value="74,2.1,7.7,3.8">Enfamil Step Up RTF (C22)</option>
                 <option value="67,1.3,7.6,3.4">Enfamil A+ 1 RTF</option>
                 <option value="67,1.3,7.0,3.6">S26 Gold 1 RTF</option>
+                <option value="68,1.3,7.6,3.4">Similac Baby 1 RTF</option>
+                <option value="66,1.3,7.4,3.4">Cow & Gate 1 RTF</option>
+                <option value="66,1.4,7.3,3.4">Friso Gold 1 RTF</option>
                 <option value="67,1.4,7.5,3.4">Smart Baby 1 RTF</option>
             </optgroup>
         </select>
@@ -97,7 +100,7 @@
 function calculateAll() {
     const w = parseFloat(document.getElementById('weight').value) || 1;
 
-    // POWDER
+    // --- POWDER CALC ---
     const pD = document.getElementById('p_formula').value.split(',');
     const p_sc = parseFloat(document.getElementById('p_scoops').value) || 0;
     const p_wa = parseFloat(document.getElementById('p_water').value) || 0;
@@ -105,45 +108,46 @@ function calculateAll() {
     const p_poly = parseFloat(document.getElementById('p_poly').value) || 0;
     const p_fat_m = parseFloat(document.getElementById('p_fat').value) || 0;
 
-    const p_m = p_sc * parseFloat(pD[4]) * p_fe;
-    let p_kcal = (p_m / 100) * parseFloat(pD[0]) + (p_poly * 3.8 * p_fe) + (p_fat_m * 4.5 * p_fe);
-    let p_pro = (p_m / 100) * parseFloat(pD[1]);
-    let p_cho = (p_m / 100) * parseFloat(pD[2]) + (p_poly * 0.94 * p_fe);
-    let p_fat = (p_m / 100) * parseFloat(pD[3]) + (p_fat_m * 0.5 * p_fe);
+    const p_vol_feed = (p_wa + (p_sc * parseFloat(pD[4]) * 0.75)) / p_sc * (p_sc / (p_fe > 0 ? 1 : 1)); // Single feed water + displacement
+    const p_total_vol = (p_wa + (p_sc * parseFloat(pD[4]) * 0.75)) * p_fe;
+    const p_single_vol = p_total_vol / (p_fe > 0 ? p_fe : 1);
 
-    const p_vol_feed = (p_wa + (p_sc * parseFloat(pD[4]) * 0.75)) / p_fe;
-    const p_vol_total = (p_wa + (p_sc * parseFloat(pD[4]) * 0.75)) * p_fe;
-    
-    const p_oz = (p_kcal / p_vol_total) * 29.57;
+    const p_m_total = p_sc * parseFloat(pD[4]) * p_fe;
+    let p_kcal = (p_m_total / 100) * parseFloat(pD[0]) + (p_poly * 3.8 * p_fe) + (p_fat_m * 4.5 * p_fe);
+    let p_pro = (p_m_total / 100) * parseFloat(pD[1]);
+    let p_cho = (p_m_total / 100) * parseFloat(pD[2]) + (p_poly * 0.94 * p_fe);
+    let p_fat = (p_m_total / 100) * parseFloat(pD[3]) + (p_fat_m * 0.5 * p_fe);
+
+    const p_oz = (p_kcal / p_total_vol) * 29.57;
     const p_str = parseFloat(pD[5]) / (p_wa / p_sc);
     const p_gir = (p_cho * 1000) / (w * 1440);
 
-    renderResult('p_results', p_kcal, p_pro, p_vol_total, w, p_oz, p_gir, p_cho, p_fat, p_str, p_poly, p_fat_m, p_vol_feed);
+    renderResult('p_results', p_kcal, p_pro, p_total_vol, w, p_oz, p_gir, p_cho, p_fat, p_str, p_poly, p_fat_m, p_single_vol);
 
-    // LIQUID
+    // --- LIQUID CALC ---
     const lD = document.getElementById('l_formula').value.split(',');
-    const l_v = parseFloat(document.getElementById('l_vol').value) || 0;
+    const l_v_feed = parseFloat(document.getElementById('l_vol').value) || 0;
     const l_f = parseFloat(document.getElementById('l_feeds').value) || 0;
     const l_poly = parseFloat(document.getElementById('l_poly').value) || 0;
     const l_fat_m = parseFloat(document.getElementById('l_fat').value) || 0;
 
-    let l_kcal = ((parseFloat(lD[0])/100) * l_v * l_f) + (l_poly * 3.8 * l_f) + (l_fat_m * 4.5 * l_f);
-    let l_pro = (parseFloat(lD[1])/100) * l_v * l_f;
-    let l_cho = ((parseFloat(lD[2])/100) * l_v * l_f) + (l_poly * 0.94 * l_f);
-    let l_fat = ((parseFloat(lD[3])/100) * l_v * l_f) + (l_fat_m * 0.5 * l_f);
+    const l_vol_total = l_v_feed * l_f;
+    let l_kcal = ((parseFloat(lD[0])/100) * l_vol_total) + (l_poly * 3.8 * l_f) + (l_fat_m * 4.5 * l_f);
+    let l_pro = (parseFloat(lD[1])/100) * l_vol_total;
+    let l_cho = ((parseFloat(lD[2])/100) * l_vol_total) + (l_poly * 0.94 * l_f);
+    let l_fat = ((parseFloat(lD[3])/100) * l_vol_total) + (l_fat_m * 0.5 * l_f);
 
-    const l_vol_t = l_v * l_f;
-    const l_oz = (l_kcal / l_vol_t) * 29.57;
+    const l_oz = (l_kcal / l_vol_total) * 29.57;
     const l_gir = (l_cho * 1000) / (w * 1440);
 
-    renderResult('l_results', l_kcal, l_pro, l_vol_t, w, l_oz, l_gir, l_cho, l_fat, null, l_poly, l_fat_m, l_v);
+    renderResult('l_results', l_kcal, l_pro, l_vol_total, w, l_oz, l_gir, l_cho, l_fat, null, l_poly, l_fat_m, l_v_feed);
 }
 
 function renderResult(id, kcal, pro, vol, w, oz, gir, cho, fat, str, m_poly, m_fat, v_feed) {
     const cho_pct = (cho / (vol / 100)).toFixed(1);
     const fat_pct = (fat / (vol / 100)).toFixed(1);
     
-    // Modular percentages per feed
+    // Fixed Modular percentages locked to single feed volume
     const poly_feed_pct = v_feed > 0 ? ((m_poly / v_feed) * 100).toFixed(1) : 0;
     const fat_feed_pct = v_feed > 0 ? ((m_fat / v_feed) * 100).toFixed(1) : 0;
 
