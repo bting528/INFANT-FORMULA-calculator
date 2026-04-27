@@ -1,130 +1,130 @@
 <!DOCTYPE html>
 <html>
 <head>
-    <title>UCH Clinical Formula Calc</title>
+    <title>Clinical Formula Intake Calc</title>
     <meta name="viewport" content="width=device-width, initial-scale=1">
     <style>
-        body { font-family: -apple-system, sans-serif; padding: 20px; max-width: 600px; margin: auto; background: #f0f2f5; color: #333; }
-        .card { background: white; padding: 25px; border-radius: 15px; box-shadow: 0 4px 15px rgba(0,0,0,0.1); }
-        h2 { color: #0056b3; margin-top: 0; border-bottom: 2px solid #eef; padding-bottom: 10px; }
-        label { display: block; margin-top: 15px; font-weight: 600; font-size: 0.95em; }
-        input, select { width: 100%; padding: 12px; margin-top: 5px; border: 1px solid #ccc; border-radius: 8px; font-size: 16px; }
-        .result-box { margin-top: 25px; padding: 20px; background: #e3f2fd; border-radius: 10px; border-left: 6px solid #2196f3; }
-        .grid { display: grid; grid-template-columns: 1fr 1fr; gap: 15px; }
-        .stats { display: flex; justify-content: space-between; margin-bottom: 8px; font-size: 1.05em; }
+        body { font-family: -apple-system, sans-serif; padding: 20px; max-width: 900px; margin: auto; background: #f0f2f5; color: #333; }
+        .container { display: flex; flex-wrap: wrap; gap: 20px; }
+        .card { background: white; padding: 20px; border-radius: 12px; box-shadow: 0 4px 10px rgba(0,0,0,0.1); flex: 1; min-width: 300px; }
+        h2 { color: #0056b3; margin-top: 0; border-bottom: 2px solid #eef; padding-bottom: 8px; font-size: 1.2em; }
+        label { display: block; margin-top: 12px; font-weight: 600; font-size: 0.9em; color: #555; }
+        input, select { width: 100%; padding: 10px; margin-top: 5px; border: 1px solid #ccc; border-radius: 6px; font-size: 15px; box-sizing: border-box; }
+        .result-box { margin-top: 20px; padding: 15px; background: #e3f2fd; border-radius: 8px; border-left: 5px solid #2196f3; }
+        .stats { display: flex; justify-content: space-between; margin-bottom: 6px; }
         .val { font-weight: bold; }
-        .divider { border: 0; border-top: 1px solid #bcd; margin: 12px 0; }
-        .hidden { display: none; }
+        .divider { border: 0; border-top: 1px solid #ddd; margin: 15px 0; }
         .highlight { color: #d35400; font-weight: bold; }
+        .weight-section { width: 100%; margin-bottom: 20px; background: #fff; padding: 15px; border-radius: 12px; border: 1px solid #3498db; }
     </style>
 </head>
 <body>
 
-<div class="card">
-    <h2>🍼 Clinical Intake Calc</h2>
-    
-    <label>Infant Weight (kg)</label>
+<div class="weight-section">
+    <label style="margin-top:0;">Infant Current Weight (kg)</label>
     <input type="number" id="weight" value="3.5" step="0.1" oninput="calculate()">
+</div>
 
-    <label>Select Formula</label>
-    <select id="formula" onchange="toggleInputs()">
-        <optgroup label="Polymeric">
-            <option value="510,10.5,56,4.4,30,powder">Standard Stage 1 (C20)</option>
-            <option value="510,14.5,53,4.9,30,powder">Enfamil Step Up (C22)</option>
-            <option value="81,2.4,8.9,0,0,rtf">Frisolac Prem RTF (C24)</option>
-            <option value="510,13.1,52,5.0,30,powder">Infatrini (C30)</option>
-        </optgroup>
-        <optgroup label="EHF / Elemental">
-            <option value="503,13.5,51,4.5,30,powder">Pepti-Junior (C20)</option>
-            <option value="500,13.5,54,4.6,30,powder">Neocate LCP (C20)</option>
-        </optgroup>
-    </select>
+<div class="container">
+    <div class="card">
+        <h2>🛠️ Powder (Adjustable)</h2>
+        <label>Select Product</label>
+        <select id="p_formula" onchange="calculate()">
+            <option value="510,10.5,56,4.4,30">Normal Stage 1 (C20)</option>
+            <option value="510,14.5,53,4.9,30">Enfamil Step Up (C22)</option>
+            <option value="510,13.1,52,5.0,30">Infatrini Powder (C30)</option>
+            <option value="503,13.5,51,4.5,30">Pepti-Junior (C20)</option>
+            <option value="500,13.5,54,4.6,30">Neocate LCP (C20)</option>
+        </select>
 
-    <div id="powder-inputs">
-        <div class="grid">
-            <div>
-                <label>Scoops/Feed</label>
-                <input type="number" id="scoops" value="3" step="0.5" oninput="calculate()">
-            </div>
-            <div>
-                <label>Water (ml)</label>
-                <input type="number" id="water" value="90" oninput="calculate()">
-            </div>
-        </div>
+        <label>Scoops per Feed</label>
+        <input type="number" id="p_scoops" value="3" step="0.5" oninput="calculate()">
+        
+        <label>Water added per Feed (ml)</label>
+        <input type="number" id="p_water" value="90" oninput="calculate()">
+        
         <label>Feeds per Day</label>
-        <input type="number" id="feeds" value="8" oninput="calculate()">
+        <input type="number" id="p_feeds" value="8" oninput="calculate()">
+
+        <div class="result-box" id="p_results"></div>
     </div>
 
-    <div id="rtf-inputs" class="hidden">
-        <label>Total Daily Volume (ml)</label>
-        <input type="number" id="daily_vol_rtf" value="500" oninput="calculate()">
-    </div>
+    <div class="card">
+        <h2>🍼 Liquid (Standard RTF)</h2>
+        <label>Select Product</label>
+        <select id="l_formula" onchange="calculate()">
+            <option value="81,2.4,8.9">Frisolac Premature RTF (C24)</option>
+            <option value="101,2.6,10.3">Infatrini RTF (C30)</option>
+            <option value="67,1.3,7.0">Standard Stage 1 RTF (C20)</option>
+            <option value="66,1.4,7.3">FrisoGold 1 RTF</option>
+        </select>
 
-    <div class="result-box" id="results"></div>
+        <label>Volume per Feed (ml)</label>
+        <input type="number" id="l_vol" value="60" oninput="calculate()">
+        
+        <label>Feeds per Day</label>
+        <input type="number" id="l_feeds" value="8" oninput="calculate()">
+
+        <div class="result-box" id="l_results"></div>
+    </div>
 </div>
 
 <script>
-function toggleInputs() {
-    const type = document.getElementById('formula').value.split(',')[5];
-    document.getElementById('powder-inputs').classList.toggle('hidden', type === 'rtf');
-    document.getElementById('rtf-inputs').classList.toggle('hidden', type === 'powder');
-    calculate();
-}
-
 function calculate() {
     const weight = parseFloat(document.getElementById('weight').value) || 1;
-    const data = document.getElementById('formula').value.split(',');
+
+    // --- Powder Logic ---
+    const p_data = document.getElementById('p_formula').value.split(',');
+    const p_kcal100g = parseFloat(p_data[0]);
+    const p_pro100g = parseFloat(p_data[1]);
+    const p_scoopG = parseFloat(p_data[3]);
+    const p_stdVol = parseFloat(p_data[4]);
     
-    const kcal100g = parseFloat(data[0]);
-    const pro100g = parseFloat(data[1]);
-    const scoopG = parseFloat(data[3]);
-    const stdVolPerScoop = parseFloat(data[4]);
-    const type = data[5];
+    const p_scoops = parseFloat(document.getElementById('p_scoops').value) || 0;
+    const p_water = parseFloat(document.getElementById('p_water').value) || 0;
+    const p_num = parseFloat(document.getElementById('p_feeds').value) || 0;
 
-    let totalKcal, totalPro, dailyVol, kcalPerOz, strengthStr;
+    const p_dailyPowder = p_scoops * p_scoopG * p_num;
+    const p_totalKcal = (p_dailyPowder / 100) * p_kcal100g;
+    const p_totalPro = (p_dailyPowder / 100) * p_pro100g;
+    const p_volPerFeed = p_water + (p_scoops * p_scoopG * 0.75);
+    const p_dailyVol = p_volPerFeed * p_num;
+    
+    const p_kcalOz = (p_totalKcal / p_dailyVol) * 29.57;
+    const p_strength = p_stdVol / (p_water / p_scoops);
 
-    if (type === 'rtf') {
-        dailyVol = parseFloat(document.getElementById('daily_vol_rtf').value) || 0;
-        totalKcal = (kcal100g / 100) * dailyVol;
-        totalPro = (pro100g / 100) * dailyVol;
-        kcalPerOz = (totalKcal / dailyVol) * 29.57;
-        strengthStr = "RTF (Standard)";
-    } else {
-        const scoops = parseFloat(document.getElementById('scoops').value) || 0;
-        const water = parseFloat(document.getElementById('water').value) || 0;
-        const feeds = parseFloat(document.getElementById('feeds').value) || 0;
-        
-        const dailyPowderG = scoops * scoopG * feeds;
-        totalKcal = (dailyPowderG / 100) * kcal100g;
-        totalPro = (dailyPowderG / 100) * pro100g;
-        
-        // Volume calculation with displacement
-        const volPerFeed = water + (scoops * scoopG * 0.75);
-        dailyVol = volPerFeed * feeds;
-        
-        // Energy Density
-        kcalPerOz = (totalKcal / dailyVol) * 29.57;
-
-        // Dilution Strength Logic
-        // Actual ml/scoop vs Standard ml/scoop
-        const actualMlPerScoop = water / scoops;
-        const strengthRatio = stdVolPerScoop / actualMlPerScoop;
-        strengthStr = strengthRatio.toFixed(2) + "x Standard";
-    }
-
-    document.getElementById('results').innerHTML = `
-        <div class="stats"><span>Energy:</span> <span class="val">${(totalKcal/weight).toFixed(1)} kcal/kg</span></div>
-        <div class="stats"><span>Protein:</span> <span class="val">${(totalPro/weight).toFixed(2)} g/kg</span></div>
-        <div class="stats"><span>Fluid:</span> <span class="val">${(dailyVol/weight).toFixed(0)} ml/kg</span></div>
-        
+    document.getElementById('p_results').innerHTML = `
+        <div class="stats"><span>Energy:</span> <span class="val">${(p_totalKcal/weight).toFixed(1)} kcal/kg</span></div>
+        <div class="stats"><span>Protein:</span> <span class="val">${(p_totalPro/weight).toFixed(2)} g/kg</span></div>
+        <div class="stats"><span>Fluid:</span> <span class="val">${(p_dailyVol/weight).toFixed(0)} ml/kg</span></div>
         <div class="divider"></div>
-        
-        <div class="stats"><span>Energy Density:</span> <span class="val highlight">${kcalPerOz.toFixed(1)} kcal/oz</span></div>
-        <div class="stats"><span>Prep Strength:</span> <span class="val">${strengthStr}</span></div>
-        <div class="stats" style="font-size:0.9em;">P/E Ratio: <span>${((totalPro/totalKcal)*100).toFixed(2)} g/100kcal</span></div>
+        <div class="stats"><span>Density:</span> <span class="val highlight">${p_kcalOz.toFixed(1)} kcal/oz</span></div>
+        <div class="stats"><span>Strength:</span> <span class="val">${p_strength.toFixed(2)}x Standard</span></div>
+    `;
+
+    // --- Liquid Logic ---
+    const l_data = document.getElementById('l_formula').value.split(',');
+    const l_kcal100ml = parseFloat(l_data[0]);
+    const l_pro100ml = parseFloat(l_data[1]);
+    
+    const l_vol = parseFloat(document.getElementById('l_vol').value) || 0;
+    const l_num = parseFloat(document.getElementById('l_feeds').value) || 0;
+
+    const l_dailyVol = l_vol * l_num;
+    const l_totalKcal = (l_kcal100ml / 100) * l_dailyVol;
+    const l_totalPro = (l_pro100ml / 100) * l_dailyVol;
+    const l_kcalOz = (l_totalKcal / l_dailyVol) * 29.57;
+
+    document.getElementById('l_results').innerHTML = `
+        <div class="stats"><span>Energy:</span> <span class="val">${(l_totalKcal/weight).toFixed(1)} kcal/kg</span></div>
+        <div class="stats"><span>Protein:</span> <span class="val">${(l_totalPro/weight).toFixed(2)} g/kg</span></div>
+        <div class="stats"><span>Fluid:</span> <span class="val">${(l_dailyVol/weight).toFixed(0)} ml/kg</span></div>
+        <div class="divider"></div>
+        <div class="stats"><span>Density:</span> <span class="val">${l_kcalOz.toFixed(1)} kcal/oz</span></div>
+        <div class="stats"><span>Strength:</span> <span class="val">Standard (Fixed)</span></div>
     `;
 }
-toggleInputs();
+calculate();
 </script>
 </body>
 </html>
