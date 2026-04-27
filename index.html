@@ -1,7 +1,7 @@
 <!DOCTYPE html>
 <html>
 <head>
-    <title>HK Clinical Calc v3.4</title>
+    <title>HK Clinical Calc v3.5</title>
     <meta name="viewport" content="width=device-width, initial-scale=1">
     <style>
         body { font-family: -apple-system, sans-serif; padding: 15px; max-width: 1000px; margin: auto; background: #f0f2f5; color: #333; }
@@ -37,7 +37,9 @@
             <optgroup label="HK Standard (1:30)">
                 <option value="510,10.6,54,26.5,4.4,30">Enfamil A+ 1 (HK)</option>
                 <option value="510,10.3,57,25.8,4.3,30">Friso Gold 1 (HK)</option>
+                <option value="510,10.5,56,26.0,4.4,30">Cow & Gate 1 (HK)</option>
                 <option value="510,9.8,56,26.0,4.4,30">Nan Pro 1 (HK)</option>
+                <option value="513,10.1,56,27.0,4.3,30">S26 Gold 1 (HK)</option>
             </optgroup>
             <optgroup label="Specialty / Junior">
                 <option value="510,14.5,53,26.7,4.9,30">Enfamil A+ Step Up Care</option>
@@ -108,7 +110,6 @@ function calculateAll() {
     const p_poly = parseFloat(document.getElementById('p_poly').value) || 0;
     const p_fat_m = parseFloat(document.getElementById('p_fat').value) || 0;
 
-    const p_vol_feed = (p_wa + (p_sc * parseFloat(pD[4]) * 0.75)) / p_sc * (p_sc / (p_fe > 0 ? 1 : 1)); // Single feed water + displacement
     const p_total_vol = (p_wa + (p_sc * parseFloat(pD[4]) * 0.75)) * p_fe;
     const p_single_vol = p_total_vol / (p_fe > 0 ? p_fe : 1);
 
@@ -147,7 +148,6 @@ function renderResult(id, kcal, pro, vol, w, oz, gir, cho, fat, str, m_poly, m_f
     const cho_pct = (cho / (vol / 100)).toFixed(1);
     const fat_pct = (fat / (vol / 100)).toFixed(1);
     
-    // Fixed Modular percentages locked to single feed volume
     const poly_feed_pct = v_feed > 0 ? ((m_poly / v_feed) * 100).toFixed(1) : 0;
     const fat_feed_pct = v_feed > 0 ? ((m_fat / v_feed) * 100).toFixed(1) : 0;
 
