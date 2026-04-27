@@ -1,12 +1,12 @@
 <!DOCTYPE html>
 <html>
 <head>
-    <title>HK Clinical Formula Calc</title>
+    <title>HK Clinical Formula Calc v2.0</title>
     <meta name="viewport" content="width=device-width, initial-scale=1">
     <style>
         body { font-family: -apple-system, sans-serif; padding: 15px; max-width: 950px; margin: auto; background: #f0f2f5; color: #333; }
         .container { display: flex; flex-wrap: wrap; gap: 15px; }
-        .card { background: white; padding: 20px; border-radius: 12px; box-shadow: 0 4px 10px rgba(0,0,0,0.1); flex: 1; min-width: 320px; border-top: 5px solid #0056b3; }
+        .card { background: white; padding: 20px; border-radius: 12px; box-shadow: 0 4px 10px rgba(0,0,0,0.1); flex: 1; min-width: 340px; border-top: 5px solid #0056b3; }
         h2 { color: #0056b3; margin-top: 0; font-size: 1.1em; text-transform: uppercase; border-bottom: 1px solid #eee; padding-bottom: 8px; }
         label { display: block; margin-top: 10px; font-weight: 600; font-size: 0.85em; color: #666; }
         input, select { width: 100%; padding: 10px; margin-top: 5px; border: 1px solid #ccc; border-radius: 6px; font-size: 15px; box-sizing: border-box; }
@@ -17,7 +17,6 @@
         .alert { color: #d32f2f; font-weight: 800; border: 1px solid #d32f2f; padding: 2px 5px; border-radius: 4px; }
         .gir-box { background: #fff3e0; border-left: 5px solid #ff9800; padding: 8px; margin-top: 10px; font-size: 0.9em; }
         .weight-section { width: 100%; margin-bottom: 15px; background: #0056b3; padding: 15px; border-radius: 12px; color: white; }
-        .weight-section input { color: #000; font-weight: bold; }
     </style>
 </head>
 <body>
@@ -37,15 +36,15 @@
                 <option value="510,10.5,56,4.4,30">Cow & Gate 1 (HK)</option>
                 <option value="510,9.8,56,4.4,30">Nan Pro 1 (HK)</option>
             </optgroup>
-            <optgroup label="Abbott HK (1:60)">
-                <option value="508,10.2,55,4.4,60">Similac 1 (HK)</option>
-                <option value="517,13.1,56,4.4,60">Isomil (Soy)</option>
-            </optgroup>
             <optgroup label="Specialty / Junior">
                 <option value="510,14.5,53,4.9,30">Enfamil A+ Step Up Care (C22)</option>
                 <option value="463,13.9,60,9.2,38">Pediasure 1+ (HK)</option>
                 <option value="506,15.2,56,7.9,30">Nutren Junior (HK)</option>
                 <option value="500,15.0,55,8.0,30">Peptamen Junior (HK)</option>
+            </optgroup>
+            <optgroup label="Abbott HK (1:60)">
+                <option value="508,10.2,55,4.4,60">Similac 1 (HK)</option>
+                <option value="517,13.1,56,4.4,60">Isomil (Soy)</option>
             </optgroup>
         </select>
         <div style="display:grid; grid-template-columns: 1fr 1fr; gap:10px;">
@@ -69,14 +68,15 @@
                 <option value="81,2.4,8.9">Frisolac Prem RTF (C24)</option>
                 <option value="74,2.1,7.7">Enfamil Step Up RTF (C22)</option>
                 <option value="67,1.3,7.6">Enfamil A+ 1 RTF</option>
+                <option value="67,1.3,7.0">S26 Gold 1 RTF</option>
+                <option value="68,1.3,7.6">Similac Baby 1 RTF</option>
+                <option value="66,1.3,7.4">Cow & Gate 1 RTF</option>
+                <option value="66,1.4,7.3">Friso Gold 1 RTF</option>
                 <option value="67,1.4,7.5">Smart Baby 1 RTF</option>
             </optgroup>
         </select>
-        <label>Volume per Feed (ml)</label>
-        <input type="number" id="l_vol" value="25" oninput="calculateAll()">
-        <label>Feeds per Day</label>
-        <input type="number" id="l_feeds" value="8" oninput="calculateAll()">
-        
+        <label>Volume per Feed (ml)</label><input type="number" id="l_vol" value="25" oninput="calculateAll()">
+        <label>Feeds per Day</label><input type="number" id="l_feeds" value="8" oninput="calculateAll()">
         <div class="result-box" id="l_results"></div>
     </div>
 </div>
@@ -85,7 +85,7 @@
 function calculateAll() {
     const w = parseFloat(document.getElementById('weight').value) || 1;
 
-    // POWDER CALC
+    // POWDER
     const pD = document.getElementById('p_formula').value.split(',');
     const p_sc = parseFloat(document.getElementById('p_scoops').value) || 0;
     const p_wa = parseFloat(document.getElementById('p_water').value) || 0;
@@ -110,7 +110,7 @@ function calculateAll() {
         <div class="gir-box"><strong>GIR:</strong> ${p_gir.toFixed(2)} mg/kg/min</div>
     `;
 
-    // LIQUID/EBM CALC
+    // LIQUID
     const lD = document.getElementById('l_formula').value.split(',');
     const l_v = parseFloat(document.getElementById('l_vol').value) || 0;
     const l_f = parseFloat(document.getElementById('l_feeds').value) || 0;
@@ -122,7 +122,7 @@ function calculateAll() {
     const l_gir = (l_cho * 1000) / (w * 1440);
 
     document.getElementById('l_results').innerHTML = `
-        <div class="stats"><span>Energy:</span> <span class="val">${(l_kcal/w).toFixed(1)} kcal/kcal/kg</span></div>
+        <div class="stats"><span>Energy:</span> <span class="val">${(l_kcal/w).toFixed(1)} kcal/kg</span></div>
         <div class="stats"><span>Protein:</span> <span class="val">${(l_pro/w).toFixed(2)} g/kg</span></div>
         <div class="stats"><span>Fluid:</span> <span class="val">${(l_vol/w).toFixed(0)} ml/kg</span></div>
         <div class="divider"></div>
