@@ -1,7 +1,7 @@
 <!DOCTYPE html>
 <html>
 <head>
-    <title>HK Clinical Calc v3.2</title>
+    <title>HK Clinical Calc v3.3</title>
     <meta name="viewport" content="width=device-width, initial-scale=1">
     <style>
         body { font-family: -apple-system, sans-serif; padding: 15px; max-width: 1000px; margin: auto; background: #f0f2f5; color: #333; }
@@ -15,9 +15,10 @@
         .stats { display: flex; justify-content: space-between; margin-bottom: 5px; font-size: 1.05em; }
         .val { font-weight: bold; }
         .divider { border: 0; border-top: 1px solid #ddd; margin: 12px 0; }
-        .alert { color: #d32f2f; font-weight: 800; border: 1px solid #d32f2f; padding: 2px 5px; border-radius: 4px; }
+        .alert { color: #d32f2f !important; border-color: #d32f2f !important; font-weight: 900; }
         .concentration-box { display: flex; gap: 10px; margin-top: 10px; }
-        .conc-item { flex: 1; padding: 8px; border-radius: 6px; text-align: center; font-size: 0.9em; font-weight: bold; border: 1px solid #ddd; background: white; }
+        .conc-item { flex: 1; padding: 8px; border-radius: 6px; text-align: center; font-size: 0.85em; font-weight: bold; border: 1px solid #ddd; background: white; }
+        .mod-load { font-size: 0.75em; color: #777; margin-top: 5px; font-style: italic; text-align: right; }
         .gir-box { background: #fff3e0; border-left: 5px solid #ff9800; padding: 8px; margin-top: 10px; font-size: 0.9em; }
         .weight-section { width: 100%; margin-bottom: 15px; background: #0056b3; padding: 15px; border-radius: 12px; color: white; }
     </style>
@@ -80,16 +81,14 @@
             </optgroup>
         </select>
 
-        <label>Volume per Feed (ml)</label>
-        <input type="number" id="l_vol" value="25" oninput="calculateAll()">
+        <label>Volume per Feed (ml)</label><input type="number" id="l_vol" value="25" oninput="calculateAll()">
 
         <div class="mod-section">
             <label>+ Polycal (g/feed)</label><input type="number" id="l_poly" value="0" step="0.1" oninput="calculateAll()">
             <label>+ Liquigen/Calogen (ml/feed)</label><input type="number" id="l_fat" value="0" step="0.1" oninput="calculateAll()">
         </div>
 
-        <label>Feeds per Day</label>
-        <input type="number" id="l_feeds" value="8" oninput="calculateAll()">
+        <label>Feeds per Day</label><input type="number" id="l_feeds" value="8" oninput="calculateAll()">
         <div id="l_results"></div>
     </div>
 </div>
@@ -112,12 +111,14 @@ function calculateAll() {
     let p_cho = (p_m / 100) * parseFloat(pD[2]) + (p_poly * 0.94 * p_fe);
     let p_fat = (p_m / 100) * parseFloat(pD[3]) + (p_fat_m * 0.5 * p_fe);
 
-    const p_vol = (p_wa + (p_sc * parseFloat(pD[4]) * 0.75)) * p_fe;
-    const p_oz = (p_kcal / p_vol) * 29.57;
+    const p_vol_feed = (p_wa + (p_sc * parseFloat(pD[4]) * 0.75)) / p_fe;
+    const p_vol_total = (p_wa + (p_sc * parseFloat(pD[4]) * 0.75)) * p_fe;
+    
+    const p_oz = (p_kcal / p_vol_total) * 29.57;
     const p_str = parseFloat(pD[5]) / (p_wa / p_sc);
     const p_gir = (p_cho * 1000) / (w * 1440);
 
-    renderResult('p_results', p_kcal, p_pro, p_vol, w, p_oz, p_gir, p_cho, p_fat, p_str);
+    renderResult('p_results', p_kcal, p_pro, p_vol_total, w, p_oz, p_gir, p_cho, p_fat, p_str, p_poly, p_fat_m, p_vol_feed);
 
     // LIQUID
     const lD = document.getElementById('l_formula').value.split(',');
@@ -135,13 +136,17 @@ function calculateAll() {
     const l_oz = (l_kcal / l_vol_t) * 29.57;
     const l_gir = (l_cho * 1000) / (w * 1440);
 
-    renderResult('l_results', l_kcal, l_pro, l_vol_t, w, l_oz, l_gir, l_cho, l_fat, null);
+    renderResult('l_results', l_kcal, l_pro, l_vol_t, w, l_oz, l_gir, l_cho, l_fat, null, l_poly, l_fat_m, l_v);
 }
 
-function renderResult(id, kcal, pro, vol, w, oz, gir, cho, fat, str) {
-    const cho_pct = (cho / (vol / 100)).toFixed(1); // Grams per 100ml
-    const fat_pct = (fat / (vol / 100)).toFixed(1); // Grams per 100ml
+function renderResult(id, kcal, pro, vol, w, oz, gir, cho, fat, str, m_poly, m_fat, v_feed) {
+    const cho_pct = (cho / (vol / 100)).toFixed(1);
+    const fat_pct = (fat / (vol / 100)).toFixed(1);
     
+    // Modular percentages per feed
+    const poly_feed_pct = v_feed > 0 ? ((m_poly / v_feed) * 100).toFixed(1) : 0;
+    const fat_feed_pct = v_feed > 0 ? ((m_fat / v_feed) * 100).toFixed(1) : 0;
+
     let strHtml = str ? `<div class="stats"><span>Strength:</span> <span class="${(str > 1.2 || str < 0.8) ? 'val alert' : 'val'}">${str.toFixed(2)}x Std</span></div>` : '';
 
     document.getElementById(id).innerHTML = `
@@ -154,9 +159,10 @@ function renderResult(id, kcal, pro, vol, w, oz, gir, cho, fat, str) {
             ${strHtml}
             <div class="gir-box"><strong>GIR:</strong> ${gir.toFixed(2)} mg/kg/min</div>
             <div class="concentration-box">
-                <div class="conc-item" style="color:#1976d2">CHO: ${cho_pct}% (g/dL)</div>
-                <div class="conc-item" style="color:#388e3c">Fat: ${fat_pct}% (g/dL)</div>
+                <div class="conc-item ${cho_pct > 12 ? 'alert' : ''}" style="color:#1976d2">CHO: ${cho_pct}%</div>
+                <div class="conc-item ${fat_pct > 7 ? 'alert' : ''}" style="color:#388e3c">Fat: ${fat_pct}%</div>
             </div>
+            <div class="mod-load">Modular Load: P ${poly_feed_pct}% | L/C ${fat_feed_pct}%</div>
         </div>
     `;
 }
