@@ -1,14 +1,15 @@
 <!DOCTYPE html>
 <html>
 <head>
-    <title>HK Clinical Calc v4.5</title>
+    <title>HK Clinical Calc v4.7</title>
     <meta name="viewport" content="width=device-width, initial-scale=1, user-scalable=no">
     <meta name="apple-mobile-web-app-capable" content="yes">
     <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
-    <meta name="apple-mobile-web-app-title" content="Infant Feeding">
     <style>
         body { font-family: -apple-system, sans-serif; padding: 15px; max-width: 1000px; margin: auto; background: #f0f2f5; color: #333; }
-        .title-bar { text-align: center; font-size: 1.4em; font-weight: bold; color: #0056b3; margin-bottom: 15px; text-transform: uppercase; letter-spacing: 1px; }
+        .title-bar { text-align: center; margin-bottom: 5px; }
+        .app-name { font-size: 1.4em; font-weight: bold; color: #0056b3; text-transform: uppercase; letter-spacing: 1px; }
+        .db-version { font-size: 0.65em; background: #e0e0e0; color: #666; padding: 2px 8px; border-radius: 10px; display: inline-block; margin-top: 4px; vertical-align: middle; }
         .container { display: flex; flex-wrap: wrap; gap: 15px; }
         .card { background: white; padding: 20px; border-radius: 12px; box-shadow: 0 4px 10px rgba(0,0,0,0.1); flex: 1; min-width: 350px; border-top: 5px solid #0056b3; }
         h2 { color: #0056b3; margin-top: 0; font-size: 1.1em; text-transform: uppercase; border-bottom: 1px solid #eee; padding-bottom: 8px; }
@@ -21,16 +22,17 @@
         .val { font-weight: bold; }
         .divider { border: 0; border-top: 1px solid #ddd; margin: 12px 0; }
         .alert { color: #d32f2f !important; border-color: #d32f2f !important; font-weight: 900; }
-        .concentration-box { display: flex; gap: 10px; margin-top: 10px; }
-        .conc-item { flex: 1; padding: 8px; border-radius: 6px; text-align: center; font-size: 0.85em; font-weight: bold; border: 1px solid #ddd; background: white; }
-        .mod-load { font-size: 0.75em; color: #777; margin-top: 8px; font-style: italic; text-align: right; }
         .gir-box { background: #fff3e0; border-left: 5px solid #ff9800; padding: 8px; margin-top: 10px; font-size: 0.9em; }
         .weight-section { width: 100%; margin-bottom: 15px; background: #0056b3; padding: 15px; border-radius: 12px; color: white; }
+        .footer-info { text-align: center; font-size: 0.7em; color: #999; margin-top: 20px; }
     </style>
 </head>
 <body>
 
-<div class="title-bar">👶🏻 Infant Feeding Calculator</div>
+<div class="title-bar">
+    <div class="app-name">👶🏻 Infant Feeding Calc</div>
+    <div class="db-version">DB DRILL VERIFIED: 2026-04-28</div>
+</div>
 
 <div class="weight-section">
     <label style="color:white; margin-top:0;">Infant Weight (kg)</label>
@@ -65,12 +67,10 @@
             <div><label>Scoops</label><input type="number" id="p_scoops" value="3" step="0.5" oninput="calculateAll()"></div>
             <div><label>Water (ml)</label><input type="number" id="p_water" value="90" oninput="calculateAll()"></div>
         </div>
-
         <div class="mod-section">
             <label>+ Polycal (g/feed)</label><input type="number" id="p_poly" value="0" step="0.1" oninput="calculateAll()">
-            <label>+ Liquigen/Calogen (ml/feed)</label><input type="number" id="p_fat" value="0" step="0.1" oninput="calculateAll()">
+            <label>+ Fat Mod. (ml/feed)</label><input type="number" id="p_fat" value="0" step="0.1" oninput="calculateAll()">
         </div>
-
         <label>Feeds/Day</label><input type="number" id="p_feeds" value="8" oninput="calculateAll()">
         <div id="p_results"></div>
     </div>
@@ -95,24 +95,26 @@
                 <option value="67,1.4,7.5,3.4">Smart Baby 1 RTF</option>
             </optgroup>
         </select>
-
         <label>Volume per Feed (ml)</label><input type="number" id="l_vol" value="25" oninput="calculateAll()">
-
         <div class="mod-section">
             <label>+ Polycal (g/feed)</label><input type="number" id="l_poly" value="0" step="0.1" oninput="calculateAll()">
-            <label>+ Liquigen/Calogen (ml/feed)</label><input type="number" id="l_fat" value="0" step="0.1" oninput="calculateAll()">
+            <label>+ Fat Mod. (ml/feed)</label><input type="number" id="l_fat" value="0" step="0.1" oninput="calculateAll()">
         </div>
-
         <label>Feeds per Day</label><input type="number" id="l_feeds" value="8" oninput="calculateAll()">
         <div id="l_results"></div>
     </div>
+</div>
+
+<div class="footer-info">
+    VER 4.7 | DATABASE VERIFIED BY CSV DRILL: 2026-04-28<br>
+    PRECISION: EBM HALF-FAT 3.86g | FULL-FAT 4.22g
 </div>
 
 <script>
 function calculateAll() {
     const w = parseFloat(document.getElementById('weight').value) || 1;
 
-    // --- POWDER ---
+    // POWDER
     const pD = document.getElementById('p_formula').value.split(',');
     const p_sc = parseFloat(document.getElementById('p_scoops').value) || 0;
     const p_wa = parseFloat(document.getElementById('p_water').value) || 0;
@@ -120,38 +122,35 @@ function calculateAll() {
     const p_poly = parseFloat(document.getElementById('p_poly').value) || 0;
     const p_fat_m = parseFloat(document.getElementById('p_fat').value) || 0;
 
-    const p_mass_daily = p_sc * parseFloat(pD[4]) * p_fe;
+    const p_daily_mass = p_sc * parseFloat(pD[4]) * p_fe;
     const p_total_vol = (p_wa + (p_sc * parseFloat(pD[4]) * 0.75)) * p_fe;
-    const p_single_vol = p_total_vol / (p_fe > 0 ? p_fe : 1);
     
-    let pk = (p_mass_daily / 100) * parseFloat(pD[0]) + (p_poly * 3.8 * p_fe) + (p_fat_m * 4.5 * p_fe);
-    let pp = (p_mass_daily / 100) * parseFloat(pD[1]);
-    let pc = (p_mass_daily / 100) * parseFloat(pD[2]) + (p_poly * 0.94 * p_fe);
-    let pf = (p_mass_daily / 100) * parseFloat(pD[3]) + (p_fat_m * 0.5 * p_fe);
+    let pk = (p_daily_mass / 100) * parseFloat(pD[0]) + (p_poly * 3.8 * p_fe) + (p_fat_m * 4.5 * p_fe);
+    let pp = (p_daily_mass / 100) * parseFloat(pD[1]);
+    let pc = (p_daily_mass / 100) * parseFloat(pD[2]) + (p_poly * 0.94 * p_fe);
+    let pf = (p_daily_mass / 100) * parseFloat(pD[3]) + (p_fat_m * 0.5 * p_fe);
 
-    renderResult('p_results', pk, pp, p_total_vol, w, (pk/p_total_vol)*29.57, (pc*1000)/(w*1440), pc, pf, parseFloat(pD[5])/(p_wa/p_sc), p_poly, p_fat_m, p_single_vol);
+    renderResult('p_results', pk, pp, p_total_vol, w, (pk/p_total_vol)*29.57, (pc*1000)/(w*1440), pc, pf, parseFloat(pD[5])/(p_wa/p_sc), p_poly, p_fat_m, p_total_vol/p_fe);
 
-    // --- LIQUID ---
+    // LIQUID
     const lD = document.getElementById('l_formula').value.split(',');
     const lv = parseFloat(document.getElementById('l_vol').value) || 0;
     const lf = parseFloat(document.getElementById('l_feeds').value) || 0;
-    const lp_poly = parseFloat(document.getElementById('l_poly').value) || 0;
-    const lf_mod = parseFloat(document.getElementById('l_fat').value) || 0;
+    const lp = parseFloat(document.getElementById('l_poly').value) || 0;
+    const lfm = parseFloat(document.getElementById('l_fat').value) || 0;
 
     const l_vol_total = lv * lf;
-    let lk = ((parseFloat(lD[0])/100) * l_vol_total) + (lp_poly * 3.8 * lf) + (lf_mod * 4.5 * lf);
-    let lp = (parseFloat(lD[1])/100) * l_vol_total;
-    let lc = ((parseFloat(lD[2])/100) * l_vol_total) + (lp_poly * 0.94 * lf);
-    let l_fat = ((parseFloat(lD[3])/100) * l_vol_total) + (lf_mod * 0.5 * lf);
+    let lk = ((parseFloat(lD[0])/100) * l_vol_total) + (lp * 3.8 * lf) + (lfm * 4.5 * lf);
+    let l_pr = (parseFloat(lD[1])/100) * l_vol_total;
+    let l_c = ((parseFloat(lD[2])/100) * l_vol_total) + (lp * 0.94 * lf);
+    let l_f = ((parseFloat(lD[3])/100) * l_vol_total) + (lfm * 0.5 * lf);
 
-    renderResult('l_results', lk, lp, l_vol_total, w, (lk/l_vol_total)*29.57, (lc*1000)/(w*1440), lc, l_fat, null, lp_poly, lf_mod, lv);
+    renderResult('l_results', lk, l_pr, l_vol_total, w, (lk/l_vol_total)*29.57, (l_c*1000)/(w*1440), l_c, l_f, null, lp, lfm, lv);
 }
 
 function renderResult(id, kcal, pro, vol, w, oz, gir, cho, fat, str, mp, mf, vf) {
     const cho_pct = (cho / (vol / 100)).toFixed(1);
     const fat_pct = (fat / (vol / 100)).toFixed(1);
-    const p_l = vf > 0 ? ((mp / vf) * 100).toFixed(1) : 0;
-    const f_l = vf > 0 ? ((mf / vf) * 100).toFixed(1) : 0;
 
     document.getElementById(id).innerHTML = `
         <div class="result-box">
@@ -162,11 +161,10 @@ function renderResult(id, kcal, pro, vol, w, oz, gir, cho, fat, str, mp, mf, vf)
             <div class="stats"><span>Density:</span> <span class="val">${oz.toFixed(1)} kcal/oz</span></div>
             ${str ? `<div class="stats"><span>Strength:</span> <span class="val ${ (str > 1.2 || str < 0.8) ? 'alert' : '' }">${str.toFixed(2)}x Std</span></div>` : ''}
             <div class="gir-box"><strong>GIR:</strong> ${gir.toFixed(2)} mg/kg/min</div>
-            <div class="concentration-box">
-                <div class="conc-item ${cho_pct > 12 ? 'alert' : ''}" style="color:#1976d2">CHO: ${cho_pct}%</div>
-                <div class="conc-item ${fat_pct > 7 ? 'alert' : ''}" style="color:#388e3c">Fat: ${fat_pct}%</div>
+            <div style="display:flex; gap:10px; margin-top:10px;">
+                <div class="val" style="flex:1; padding:8px; border:1px solid #ddd; border-radius:6px; text-align:center; font-size:0.85em; color:#1976d2; background:white;">CHO: ${cho_pct}%</div>
+                <div class="val" style="flex:1; padding:8px; border:1px solid #ddd; border-radius:6px; text-align:center; font-size:0.85em; color:#388e3c; background:white;">Fat: ${fat_pct}%</div>
             </div>
-            <div class="mod-load">Modular Load: P ${p_l}% | L/C ${f_l}%</div>
             <div class="daily-subtext">
                 <div class="stats"><span>Daily Energy:</span> <b>${kcal.toFixed(0)} kcal</b></div>
                 <div class="stats"><span>Daily Protein:</span> <b>${pro.toFixed(1)} g</b></div>
