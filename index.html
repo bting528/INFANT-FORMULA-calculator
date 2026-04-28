@@ -1,10 +1,14 @@
 <!DOCTYPE html>
 <html>
 <head>
-    <title>HK Clinical Calc v4.7</title>
+    <title>HK Clinical Calc v4.7.2</title>
     <meta name="viewport" content="width=device-width, initial-scale=1, user-scalable=no">
     <meta name="apple-mobile-web-app-capable" content="yes">
     <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+    <meta name="apple-mobile-web-app-title" content="Infant Calc">
+    
+    <link rel="apple-touch-icon" href="https://raw.githubusercontent.com/bting528/INFANT-FORMULA-calculator/refs/heads/main/IMG_6019.png">
+    
     <style>
         body { font-family: -apple-system, sans-serif; padding: 15px; max-width: 1000px; margin: auto; background: #f0f2f5; color: #333; }
         .title-bar { text-align: center; margin-bottom: 5px; }
@@ -106,74 +110,74 @@
 </div>
 
 <div class="footer-info">
-    VER 4.7 | DATABASE VERIFIED BY CSV DRILL: 2026-04-28<br>
+    VER 4.7.2 | DATABASE VERIFIED BY CSV DRILL: 2026-04-28<br>
     PRECISION: EBM HALF-FAT 3.86g | FULL-FAT 4.22g
 </div>
 
 <script>
-function calculateAll() {
-    const w = parseFloat(document.getElementById('weight').value) || 1;
+    function calculateAll() {
+        const w = parseFloat(document.getElementById('weight').value) || 1;
 
-    // POWDER
-    const pD = document.getElementById('p_formula').value.split(',');
-    const p_sc = parseFloat(document.getElementById('p_scoops').value) || 0;
-    const p_wa = parseFloat(document.getElementById('p_water').value) || 0;
-    const p_fe = parseFloat(document.getElementById('p_feeds').value) || 0;
-    const p_poly = parseFloat(document.getElementById('p_poly').value) || 0;
-    const p_fat_m = parseFloat(document.getElementById('p_fat').value) || 0;
+        // POWDER LOGIC
+        const pD = document.getElementById('p_formula').value.split(',');
+        const p_sc = parseFloat(document.getElementById('p_scoops').value) || 0;
+        const p_wa = parseFloat(document.getElementById('p_water').value) || 0;
+        const p_fe = parseFloat(document.getElementById('p_feeds').value) || 0;
+        const p_poly = parseFloat(document.getElementById('p_poly').value) || 0;
+        const p_fat_m = parseFloat(document.getElementById('p_fat').value) || 0;
 
-    const p_daily_mass = p_sc * parseFloat(pD[4]) * p_fe;
-    const p_total_vol = (p_wa + (p_sc * parseFloat(pD[4]) * 0.75)) * p_fe;
-    
-    let pk = (p_daily_mass / 100) * parseFloat(pD[0]) + (p_poly * 3.8 * p_fe) + (p_fat_m * 4.5 * p_fe);
-    let pp = (p_daily_mass / 100) * parseFloat(pD[1]);
-    let pc = (p_daily_mass / 100) * parseFloat(pD[2]) + (p_poly * 0.94 * p_fe);
-    let pf = (p_daily_mass / 100) * parseFloat(pD[3]) + (p_fat_m * 0.5 * p_fe);
+        const p_daily_mass = p_sc * parseFloat(pD[4]) * p_fe;
+        const p_total_vol = (p_wa + (p_sc * parseFloat(pD[4]) * 0.75)) * p_fe;
+        
+        let pk = (p_daily_mass / 100) * parseFloat(pD[0]) + (p_poly * 3.8 * p_fe) + (p_fat_m * 4.5 * p_fe);
+        let pp = (p_daily_mass / 100) * parseFloat(pD[1]);
+        let pc = (p_daily_mass / 100) * parseFloat(pD[2]) + (p_poly * 0.94 * p_fe);
+        let pf = (p_daily_mass / 100) * parseFloat(pD[3]) + (p_fat_m * 0.5 * p_fe);
 
-    renderResult('p_results', pk, pp, p_total_vol, w, (pk/p_total_vol)*29.57, (pc*1000)/(w*1440), pc, pf, parseFloat(pD[5])/(p_wa/p_sc), p_poly, p_fat_m, p_total_vol/p_fe);
+        renderResult('p_results', pk, pp, p_total_vol, w, (pk/p_total_vol)*29.57, (pc*1000)/(w*1440), pc, pf, parseFloat(pD[5])/(p_wa/p_sc), p_poly, p_fat_m, p_total_vol/p_fe);
 
-    // LIQUID
-    const lD = document.getElementById('l_formula').value.split(',');
-    const lv = parseFloat(document.getElementById('l_vol').value) || 0;
-    const lf = parseFloat(document.getElementById('l_feeds').value) || 0;
-    const lp = parseFloat(document.getElementById('l_poly').value) || 0;
-    const lfm = parseFloat(document.getElementById('l_fat').value) || 0;
+        // LIQUID LOGIC
+        const lD = document.getElementById('l_formula').value.split(',');
+        const lv = parseFloat(document.getElementById('l_vol').value) || 0;
+        const lf = parseFloat(document.getElementById('l_feeds').value) || 0;
+        const lp = parseFloat(document.getElementById('l_poly').value) || 0;
+        const lfm = parseFloat(document.getElementById('l_fat').value) || 0;
 
-    const l_vol_total = lv * lf;
-    let lk = ((parseFloat(lD[0])/100) * l_vol_total) + (lp * 3.8 * lf) + (lfm * 4.5 * lf);
-    let l_pr = (parseFloat(lD[1])/100) * l_vol_total;
-    let l_c = ((parseFloat(lD[2])/100) * l_vol_total) + (lp * 0.94 * lf);
-    let l_f = ((parseFloat(lD[3])/100) * l_vol_total) + (lfm * 0.5 * lf);
+        const l_vol_total = lv * lf;
+        let lk = ((parseFloat(lD[0])/100) * l_vol_total) + (lp * 3.8 * lf) + (lfm * 4.5 * lf);
+        let l_pr = (parseFloat(lD[1])/100) * l_vol_total;
+        let l_c = ((parseFloat(lD[2])/100) * l_vol_total) + (lp * 0.94 * lf);
+        let l_f = ((parseFloat(lD[3])/100) * l_vol_total) + (lfm * 0.5 * lf);
 
-    renderResult('l_results', lk, l_pr, l_vol_total, w, (lk/l_vol_total)*29.57, (l_c*1000)/(w*1440), l_c, l_f, null, lp, lfm, lv);
-}
+        renderResult('l_results', lk, l_pr, l_vol_total, w, (lk/l_vol_total)*29.57, (l_c*1000)/(w*1440), l_c, l_f, null, lp, lfm, lv);
+    }
 
-function renderResult(id, kcal, pro, vol, w, oz, gir, cho, fat, str, mp, mf, vf) {
-    const cho_pct = (cho / (vol / 100)).toFixed(1);
-    const fat_pct = (fat / (vol / 100)).toFixed(1);
+    function renderResult(id, kcal, pro, vol, w, oz, gir, cho, fat, str, mp, mf, vf) {
+        const cho_pct = (cho / (vol / 100)).toFixed(1);
+        const fat_pct = (fat / (vol / 100)).toFixed(1);
 
-    document.getElementById(id).innerHTML = `
-        <div class="result-box">
-            <div class="stats"><span>Energy:</span> <span class="val">${(kcal/w).toFixed(1)} kcal/kg</span></div>
-            <div class="stats"><span>Protein:</span> <span class="val">${(pro/w).toFixed(2)} g/kg</span></div>
-            <div class="stats"><span>Fluid:</span> <span class="val">${(vol/w).toFixed(0)} ml/kg</span></div>
-            <div class="divider"></div>
-            <div class="stats"><span>Density:</span> <span class="val">${oz.toFixed(1)} kcal/oz</span></div>
-            ${str ? `<div class="stats"><span>Strength:</span> <span class="val ${ (str > 1.2 || str < 0.8) ? 'alert' : '' }">${str.toFixed(2)}x Std</span></div>` : ''}
-            <div class="gir-box"><strong>GIR:</strong> ${gir.toFixed(2)} mg/kg/min</div>
-            <div style="display:flex; gap:10px; margin-top:10px;">
-                <div class="val" style="flex:1; padding:8px; border:1px solid #ddd; border-radius:6px; text-align:center; font-size:0.85em; color:#1976d2; background:white;">CHO: ${cho_pct}%</div>
-                <div class="val" style="flex:1; padding:8px; border:1px solid #ddd; border-radius:6px; text-align:center; font-size:0.85em; color:#388e3c; background:white;">Fat: ${fat_pct}%</div>
+        document.getElementById(id).innerHTML = `
+            <div class="result-box">
+                <div class="stats"><span>Energy:</span> <span class="val">${(kcal/w).toFixed(1)} kcal/kg</span></div>
+                <div class="stats"><span>Protein:</span> <span class="val">${(pro/w).toFixed(2)} g/kg</span></div>
+                <div class="stats"><span>Fluid:</span> <span class="val">${(vol/w).toFixed(0)} ml/kg</span></div>
+                <div class="divider"></div>
+                <div class="stats"><span>Density:</span> <span class="val">${oz.toFixed(1)} kcal/oz</span></div>
+                ${str ? `<div class="stats"><span>Strength:</span> <span class="val ${ (str > 1.2 || str < 0.8) ? 'alert' : '' }">${str.toFixed(2)}x Std</span></div>` : ''}
+                <div class="gir-box"><strong>GIR:</strong> ${gir.toFixed(2)} mg/kg/min</div>
+                <div style="display:flex; gap:10px; margin-top:10px;">
+                    <div class="val" style="flex:1; padding:8px; border:1px solid #ddd; border-radius:6px; text-align:center; font-size:0.85em; color:#1976d2; background:white;">CHO: ${cho_pct}%</div>
+                    <div class="val" style="flex:1; padding:8px; border:1px solid #ddd; border-radius:6px; text-align:center; font-size:0.85em; color:#388e3c; background:white;">Fat: ${fat_pct}%</div>
+                </div>
+                <div class="daily-subtext">
+                    <div class="stats"><span>Daily Energy:</span> <b>${kcal.toFixed(0)} kcal</b></div>
+                    <div class="stats"><span>Daily Protein:</span> <b>${pro.toFixed(1)} g</b></div>
+                    <div class="stats"><span>Daily Carbs:</span> <b>${cho.toFixed(1)} g</b></div>
+                </div>
             </div>
-            <div class="daily-subtext">
-                <div class="stats"><span>Daily Energy:</span> <b>${kcal.toFixed(0)} kcal</b></div>
-                <div class="stats"><span>Daily Protein:</span> <b>${pro.toFixed(1)} g</b></div>
-                <div class="stats"><span>Daily Carbs:</span> <b>${cho.toFixed(1)} g</b></div>
-            </div>
-        </div>
-    `;
-}
-calculateAll();
+        `;
+    }
+    calculateAll();
 </script>
 </body>
 </html>
