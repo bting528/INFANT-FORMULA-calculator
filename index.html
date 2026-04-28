@@ -1,7 +1,7 @@
 <!DOCTYPE html>
 <html>
 <head>
-    <title>HK Clinical Calc v4.1</title>
+    <title>HK Clinical Calc v4.3</title>
     <meta name="viewport" content="width=device-width, initial-scale=1, user-scalable=no">
     <meta name="apple-mobile-web-app-capable" content="yes">
     <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
@@ -42,21 +42,22 @@
         <h2>🛠️ Powder Formula</h2>
         <select id="p_formula" onchange="calculateAll()">
             <optgroup label="Standard (1:30)">
-                <option value="510,10.6,54,26.5,4.4,30">Enfamil A+ 1</option>
-                <option value="510,10.3,57,25.8,4.3,30">Friso Gold 1</option>
-                <option value="510,10.5,56,26.0,4.4,30">Cow & Gate 1</option>
-                <option value="510,9.8,56,26.0,4.4,30">Nan Pro 1</option>
-                <option value="517,10.1,55,27.0,4.3,30">illuma 1</option>
-                <option value="513,10.1,56,27.0,4.3,30">S26 Gold 1</option>
-                <option value="510,10.5,56,25.4,4.4,30">Frisolac Gold Comfort</option>
-                <option value="510,14.5,53,26.7,4.9,30">Enfamil Step Up Care (C22)</option>
-                <option value="506,15.2,56,24.0,7.9,30">Nutren Junior</option>
-                <option value="464,15.0,55,21.0,8.0,30">Peptamen Junior</option>
+                <option value="500,10.5,58,26,4.4,30">Enfamil A+ 1</option>
+                <option value="506,11.2,57.6,25.6,4.4,30">Friso Gold 1</option>
+                <option value="499,9.7,59.8,24.5,4.5,30">Cow & Gate 1</option>
+                <option value="511,9.7,59.3,26.1,4.37,30">Nan Pro 1</option>
+                <option value="510,10.2,56,27.3,4.4,30">illuma 1</option>
+                <option value="518,11,57.1,27.5,4.4,30">S26 Gold 1</option>
+                <option value="507,10.9,57.4,26,4.3,30">Frisolac Gold Comfort</option>
+                <option value="500,13.5,52,27,4.97,30">Enfamil Step Up Care (C22)</option>
+                <option value="505,10.7,56,26,4.3,30">Enfamil Lactofree</option>
             </optgroup>
-            <optgroup label="Special Dilution (Non 1:30)">
-                <option value="523,13.4,56,28.0,4.4,60">Isomil (Soy) - 1:60</option>
-                <option value="508,10.2,55,27.0,4.4,60">Similac 1 - 1:60</option>
+            <optgroup label="Special Dilution">
+                <option value="523,13.4,56,28,8.7,60">Isomil (Soy) - 1:60</option>
+                <option value="508,10.2,55,27,8.8,60">Similac 1 - 1:60</option>
                 <option value="463,13.9,60,18.9,9.2,38">Pediasure 1+ - 1:38</option>
+                <option value="468,13.9,60.7,18.3,7.85,30">Nutren Junior</option>
+                <option value="463,13.6,62.4,18.1,7.9,30">Peptamen Junior</option>
             </optgroup>
         </select>
         
@@ -111,7 +112,7 @@
 function calculateAll() {
     const w = parseFloat(document.getElementById('weight').value) || 1;
 
-    // POWDER
+    // --- POWDER CALCULATION ---
     const pD = document.getElementById('p_formula').value.split(',');
     const p_sc = parseFloat(document.getElementById('p_scoops').value) || 0;
     const p_wa = parseFloat(document.getElementById('p_water').value) || 0;
@@ -119,31 +120,37 @@ function calculateAll() {
     const p_poly = parseFloat(document.getElementById('p_poly').value) || 0;
     const p_fat_m = parseFloat(document.getElementById('p_fat').value) || 0;
 
-    const p_total_vol = (p_wa + (p_sc * parseFloat(pD[4]) * 0.75)) * p_fe;
-    const p_single_vol = p_total_vol / (p_fe > 0 ? p_fe : 1);
-    const p_m_total = p_sc * parseFloat(pD[4]) * p_fe;
+    const p_scoop_mass = parseFloat(pD[4]);
+    const p_std_water = parseFloat(pD[5]);
     
-    let pk = (p_m_total / 100) * parseFloat(pD[0]) + (p_poly * 3.8 * p_fe) + (p_fat_m * 4.5 * p_fe);
-    let pp = (p_m_total / 100) * parseFloat(pD[1]);
-    let pc = (p_m_total / 100) * parseFloat(pD[2]) + (p_poly * 0.94 * p_fe);
-    let pf = (p_m_total / 100) * parseFloat(pD[3]) + (p_fat_m * 0.5 * p_fe);
+    // Displacement logic: 0.75ml per gram of powder
+    const p_total_vol = (p_wa + (p_sc * p_scoop_mass * 0.75)) * p_fe;
+    const p_single_vol = p_total_vol / (p_fe > 0 ? p_fe : 1);
+    const p_mass_daily = p_sc * p_scoop_mass * p_fe;
+    
+    let pk = (p_mass_daily / 100) * parseFloat(pD[0]) + (p_poly * 3.8 * p_fe) + (p_fat_m * 4.5 * p_fe);
+    let pp = (p_mass_daily / 100) * parseFloat(pD[1]);
+    let pc = (p_mass_daily / 100) * parseFloat(pD[2]) + (p_poly * 0.94 * p_fe);
+    let pf = (p_mass_daily / 100) * parseFloat(pD[3]) + (p_fat_m * 0.5 * p_fe);
 
-    renderResult('p_results', pk, pp, p_total_vol, w, (pk/p_total_vol)*29.57, (pc*1000)/(w*1440), pc, pf, parseFloat(pD[5])/(p_wa/p_sc), p_poly, p_fat_m, p_single_vol);
+    const p_strength = p_std_water / (p_wa / p_sc);
 
-    // LIQUID
+    renderResult('p_results', pk, pp, p_total_vol, w, (pk/p_total_vol)*29.57, (pc*1000)/(w*1440), pc, pf, p_strength, p_poly, p_fat_m, p_single_vol);
+
+    // --- LIQUID CALCULATION ---
     const lD = document.getElementById('l_formula').value.split(',');
     const lv = parseFloat(document.getElementById('l_vol').value) || 0;
     const lf = parseFloat(document.getElementById('l_feeds').value) || 0;
-    const lp = parseFloat(document.getElementById('l_poly').value) || 0;
-    const lfm = parseFloat(document.getElementById('l_fat').value) || 0;
+    const lp_poly = parseFloat(document.getElementById('l_poly').value) || 0;
+    const lf_mod = parseFloat(document.getElementById('l_fat').value) || 0;
 
     const l_vol_total = lv * lf;
-    let lk = ((parseFloat(lD[0])/100) * l_vol_total) + (lp * 3.8 * lf) + (lfm * 4.5 * lf);
-    let l_pr = (parseFloat(lD[1])/100) * l_vol_total;
-    let lc = ((parseFloat(lD[2])/100) * l_vol_total) + (lp * 0.94 * lf);
-    let lfat = ((parseFloat(lD[3])/100) * l_vol_total) + (lfm * 0.5 * lf);
+    let lk = ((parseFloat(lD[0])/100) * l_vol_total) + (lp_poly * 3.8 * lf) + (lf_mod * 4.5 * lf);
+    let lp = (parseFloat(lD[1])/100) * l_vol_total;
+    let lc = ((parseFloat(lD[2])/100) * l_vol_total) + (lp_poly * 0.94 * lf);
+    let l_fat = ((parseFloat(lD[3])/100) * l_vol_total) + (lf_mod * 0.5 * lf);
 
-    renderResult('l_results', lk, l_pr, l_vol_total, w, (lk/l_vol_total)*29.57, (lc*1000)/(w*1440), lc, lfat, null, lp, lfm, lv);
+    renderResult('l_results', lk, lp, l_vol_total, w, (lk/l_vol_total)*29.57, (lc*1000)/(w*1440), lc, l_fat, null, lp_poly, lf_mod, lv);
 }
 
 function renderResult(id, kcal, pro, vol, w, oz, gir, cho, fat, str, mp, mf, vf) {
@@ -168,7 +175,6 @@ function renderResult(id, kcal, pro, vol, w, oz, gir, cho, fat, str, mp, mf, vf)
                 <div class="conc-item ${fat_pct > 7 ? 'alert' : ''}" style="color:#388e3c">Fat: ${fat_pct}%</div>
             </div>
             <div class="mod-load">Modular Load: P ${p_l}% | L/C ${f_l}%</div>
-            
             <div class="daily-subtext">
                 <div class="stats" style="margin-bottom:2px;"><span>Daily Total Energy:</span> <b>${kcal.toFixed(0)} kcal</b></div>
                 <div class="stats" style="margin-bottom:2px;"><span>Daily Total Protein:</span> <b>${pro.toFixed(1)} g</b></div>
