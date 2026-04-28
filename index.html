@@ -1,7 +1,7 @@
 <!DOCTYPE html>
 <html>
 <head>
-    <title>HK Clinical Calc v4.3</title>
+    <title>HK Clinical Calc v4.5</title>
     <meta name="viewport" content="width=device-width, initial-scale=1, user-scalable=no">
     <meta name="apple-mobile-web-app-capable" content="yes">
     <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
@@ -79,16 +79,16 @@
         <h2>🍼 Liquid / EBM / HMF</h2>
         <select id="l_formula" onchange="calculateAll()">
             <optgroup label="Human Milk (EBM)">
-                <option value="67,1.2,7.0,3.5">EBM (Plain)</option>
-                <option value="75.7,1.92,7.64,4.2">EBM + Half HMF</option>
-                <option value="84.4,2.64,8.28,4.8">EBM + Full HMF</option>
+                <option value="67,1.2,7,3.5">EBM (Plain)</option>
+                <option value="75.7,1.92,7.64,3.86">EBM + Half HMF</option>
+                <option value="84.4,2.64,8.28,4.22">EBM + Full HMF</option>
             </optgroup>
             <optgroup label="HK RTF Formulas">
                 <option value="101,2.6,10.3,5.4">Infatrini RTF (C30)</option>
                 <option value="81,2.4,8.9,3.9">Frisolac Prem RTF (C24)</option>
                 <option value="74,2.1,7.7,3.8">Enfamil Step Up RTF (C22)</option>
                 <option value="67,1.3,7.6,3.4">Enfamil A+ 1 RTF</option>
-                <option value="67,1.3,7.0,3.6">S26 Gold 1 RTF</option>
+                <option value="67,1.3,7,3.6">S26 Gold 1 RTF</option>
                 <option value="68,1.3,7.6,3.4">Similac Baby 1 RTF</option>
                 <option value="66,1.3,7.4,3.4">Cow & Gate 1 RTF</option>
                 <option value="66,1.4,7.3,3.4">Friso Gold 1 RTF</option>
@@ -112,7 +112,7 @@
 function calculateAll() {
     const w = parseFloat(document.getElementById('weight').value) || 1;
 
-    // --- POWDER CALCULATION ---
+    // --- POWDER ---
     const pD = document.getElementById('p_formula').value.split(',');
     const p_sc = parseFloat(document.getElementById('p_scoops').value) || 0;
     const p_wa = parseFloat(document.getElementById('p_water').value) || 0;
@@ -120,24 +120,18 @@ function calculateAll() {
     const p_poly = parseFloat(document.getElementById('p_poly').value) || 0;
     const p_fat_m = parseFloat(document.getElementById('p_fat').value) || 0;
 
-    const p_scoop_mass = parseFloat(pD[4]);
-    const p_std_water = parseFloat(pD[5]);
-    
-    // Displacement logic: 0.75ml per gram of powder
-    const p_total_vol = (p_wa + (p_sc * p_scoop_mass * 0.75)) * p_fe;
+    const p_mass_daily = p_sc * parseFloat(pD[4]) * p_fe;
+    const p_total_vol = (p_wa + (p_sc * parseFloat(pD[4]) * 0.75)) * p_fe;
     const p_single_vol = p_total_vol / (p_fe > 0 ? p_fe : 1);
-    const p_mass_daily = p_sc * p_scoop_mass * p_fe;
     
     let pk = (p_mass_daily / 100) * parseFloat(pD[0]) + (p_poly * 3.8 * p_fe) + (p_fat_m * 4.5 * p_fe);
     let pp = (p_mass_daily / 100) * parseFloat(pD[1]);
     let pc = (p_mass_daily / 100) * parseFloat(pD[2]) + (p_poly * 0.94 * p_fe);
     let pf = (p_mass_daily / 100) * parseFloat(pD[3]) + (p_fat_m * 0.5 * p_fe);
 
-    const p_strength = p_std_water / (p_wa / p_sc);
+    renderResult('p_results', pk, pp, p_total_vol, w, (pk/p_total_vol)*29.57, (pc*1000)/(w*1440), pc, pf, parseFloat(pD[5])/(p_wa/p_sc), p_poly, p_fat_m, p_single_vol);
 
-    renderResult('p_results', pk, pp, p_total_vol, w, (pk/p_total_vol)*29.57, (pc*1000)/(w*1440), pc, pf, p_strength, p_poly, p_fat_m, p_single_vol);
-
-    // --- LIQUID CALCULATION ---
+    // --- LIQUID ---
     const lD = document.getElementById('l_formula').value.split(',');
     const lv = parseFloat(document.getElementById('l_vol').value) || 0;
     const lf = parseFloat(document.getElementById('l_feeds').value) || 0;
@@ -159,8 +153,6 @@ function renderResult(id, kcal, pro, vol, w, oz, gir, cho, fat, str, mp, mf, vf)
     const p_l = vf > 0 ? ((mp / vf) * 100).toFixed(1) : 0;
     const f_l = vf > 0 ? ((mf / vf) * 100).toFixed(1) : 0;
 
-    let strHtml = str ? `<div class="stats"><span>Strength:</span> <span class="${(str > 1.2 || str < 0.8) ? 'val alert' : 'val'}">${str.toFixed(2)}x Std</span></div>` : '';
-
     document.getElementById(id).innerHTML = `
         <div class="result-box">
             <div class="stats"><span>Energy:</span> <span class="val">${(kcal/w).toFixed(1)} kcal/kg</span></div>
@@ -168,7 +160,7 @@ function renderResult(id, kcal, pro, vol, w, oz, gir, cho, fat, str, mp, mf, vf)
             <div class="stats"><span>Fluid:</span> <span class="val">${(vol/w).toFixed(0)} ml/kg</span></div>
             <div class="divider"></div>
             <div class="stats"><span>Density:</span> <span class="val">${oz.toFixed(1)} kcal/oz</span></div>
-            ${strHtml}
+            ${str ? `<div class="stats"><span>Strength:</span> <span class="val ${ (str > 1.2 || str < 0.8) ? 'alert' : '' }">${str.toFixed(2)}x Std</span></div>` : ''}
             <div class="gir-box"><strong>GIR:</strong> ${gir.toFixed(2)} mg/kg/min</div>
             <div class="concentration-box">
                 <div class="conc-item ${cho_pct > 12 ? 'alert' : ''}" style="color:#1976d2">CHO: ${cho_pct}%</div>
@@ -176,9 +168,9 @@ function renderResult(id, kcal, pro, vol, w, oz, gir, cho, fat, str, mp, mf, vf)
             </div>
             <div class="mod-load">Modular Load: P ${p_l}% | L/C ${f_l}%</div>
             <div class="daily-subtext">
-                <div class="stats" style="margin-bottom:2px;"><span>Daily Total Energy:</span> <b>${kcal.toFixed(0)} kcal</b></div>
-                <div class="stats" style="margin-bottom:2px;"><span>Daily Total Protein:</span> <b>${pro.toFixed(1)} g</b></div>
-                <div class="stats" style="margin-bottom:0;"><span>Daily Total Carbs:</span> <b>${cho.toFixed(1)} g</b></div>
+                <div class="stats"><span>Daily Energy:</span> <b>${kcal.toFixed(0)} kcal</b></div>
+                <div class="stats"><span>Daily Protein:</span> <b>${pro.toFixed(1)} g</b></div>
+                <div class="stats"><span>Daily Carbs:</span> <b>${cho.toFixed(1)} g</b></div>
             </div>
         </div>
     `;
