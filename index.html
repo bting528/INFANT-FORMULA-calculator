@@ -1,7 +1,7 @@
 <!DOCTYPE html>
 <html>
 <head>
-    <title>HK Clinical Calc v3.9</title>
+    <title>HK Clinical Calc v4.0</title>
     <meta name="viewport" content="width=device-width, initial-scale=1, user-scalable=no">
     <meta name="apple-mobile-web-app-capable" content="yes">
     <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
@@ -26,7 +26,12 @@
         .mod-load { font-size: 0.75em; color: #777; margin-top: 8px; font-style: italic; text-align: right; }
         .gir-box { background: #fff3e0; border-left: 5px solid #ff9800; padding: 8px; margin-top: 10px; font-size: 0.9em; }
         .weight-section { width: 100%; margin-bottom: 15px; background: #0056b3; padding: 15px; border-radius: 12px; color: white; }
-        .total-item { display: flex; justify-content: space-between; font-size: 1.2em; padding: 5px 0; border-bottom: 1px dashed #bbdefb; }
+        
+        /* Summary Table Styling */
+        table { width: 100%; border-collapse: collapse; margin-top: 10px; background: white; border-radius: 8px; overflow: hidden; }
+        th, td { padding: 12px; text-align: center; border: 1px solid #dee2e6; }
+        th { background: #f1f8ff; color: #0056b3; font-size: 0.85em; text-transform: uppercase; }
+        .total-row { background: #fff9c4; font-weight: bold; }
     </style>
 </head>
 <body>
@@ -42,7 +47,7 @@
     <div class="card">
         <h2>🛠️ Powder Formula</h2>
         <select id="p_formula" onchange="calculateAll()">
-            <optgroup label="Standard Dilution (1:30)">
+            <optgroup label="Standard (1:30)">
                 <option value="510,10.6,54,26.5,4.4,30">Enfamil A+ 1</option>
                 <option value="510,10.3,57,25.8,4.3,30">Friso Gold 1</option>
                 <option value="510,10.5,56,26.0,4.4,30">Cow & Gate 1</option>
@@ -108,10 +113,37 @@
     </div>
 
     <div class="card summary-card">
-        <h2>📊 Daily Total Intake (Combined)</h2>
-        <div class="total-item"><span>Total Energy:</span> <span id="tot_kcal" class="val">0 kcal</span></div>
-        <div class="total-item"><span>Total Protein:</span> <span id="tot_pro" class="val">0 g</span></div>
-        <div class="total-item"><span>Total Carbs:</span> <span id="tot_cho" class="val">0 g</span></div>
+        <h2>📊 Daily Intake Summary (Daily Totals)</h2>
+        <table>
+            <thead>
+                <tr>
+                    <th>Component</th>
+                    <th>Powder</th>
+                    <th>Liquid</th>
+                    <th>Combined</th>
+                </tr>
+            </thead>
+            <tbody>
+                <tr>
+                    <td>Energy (kcal)</td>
+                    <td id="p_tot_kcal">-</td>
+                    <td id="l_tot_kcal">-</td>
+                    <td id="comb_kcal" style="font-weight:bold;">-</td>
+                </tr>
+                <tr>
+                    <td>Protein (g)</td>
+                    <td id="p_tot_pro">-</td>
+                    <td id="l_tot_pro">-</td>
+                    <td id="comb_pro" style="font-weight:bold;">-</td>
+                </tr>
+                <tr>
+                    <td>Carbs (g)</td>
+                    <td id="p_tot_cho">-</td>
+                    <td id="l_tot_cho">-</td>
+                    <td id="comb_cho" style="font-weight:bold;">-</td>
+                </tr>
+            </tbody>
+        </table>
     </div>
 </div>
 
@@ -119,7 +151,7 @@
 function calculateAll() {
     const w = parseFloat(document.getElementById('weight').value) || 1;
 
-    // --- POWDER CALC ---
+    // --- POWDER ---
     const pD = document.getElementById('p_formula').value.split(',');
     const p_sc = parseFloat(document.getElementById('p_scoops').value) || 0;
     const p_wa = parseFloat(document.getElementById('p_water').value) || 0;
@@ -141,7 +173,7 @@ function calculateAll() {
 
     renderResult('p_results', pk, pp, p_total_vol, w, (pk/p_total_vol)*29.57, (pc*1000)/(w*1440), pc, pf, p_str, p_poly_f, p_fat_f, p_single_vol);
 
-    // --- LIQUID CALC ---
+    // --- LIQUID ---
     const lD = document.getElementById('l_formula').value.split(',');
     const lv = parseFloat(document.getElementById('l_vol').value) || 0;
     const lf = parseFloat(document.getElementById('l_feeds').value) || 0;
@@ -156,10 +188,18 @@ function calculateAll() {
 
     renderResult('l_results', lk, lp, l_vol_total, w, (lk/l_vol_total)*29.57, (lc*1000)/(w*1440), lc, lfat, null, lp_f, lf_f, lv);
 
-    // --- TOTAL SUMMARY ---
-    document.getElementById('tot_kcal').innerText = (pk + lk).toFixed(0) + ' kcal';
-    document.getElementById('tot_pro').innerText = (pp + lp).toFixed(1) + ' g';
-    document.getElementById('tot_cho').innerText = (pc + lc).toFixed(1) + ' g';
+    // --- SUMMARY TABLE UPDATES ---
+    document.getElementById('p_tot_kcal').innerText = pk.toFixed(0);
+    document.getElementById('l_tot_kcal').innerText = lk.toFixed(0);
+    document.getElementById('comb_kcal').innerText = (pk + lk).toFixed(0);
+
+    document.getElementById('p_tot_pro').innerText = pp.toFixed(1);
+    document.getElementById('l_tot_pro').innerText = lp.toFixed(1);
+    document.getElementById('comb_pro').innerText = (pp + lp).toFixed(1);
+
+    document.getElementById('p_tot_cho').innerText = pc.toFixed(1);
+    document.getElementById('l_tot_cho').innerText = lc.toFixed(1);
+    document.getElementById('comb_cho').innerText = (pc + lc).toFixed(1);
 }
 
 function renderResult(id, kcal, pro, vol, w, oz, gir, cho, fat, str, mp, mf, vf) {
