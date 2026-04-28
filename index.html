@@ -1,7 +1,7 @@
 <!DOCTYPE html>
 <html>
 <head>
-    <title>HK Clinical Calc v4.0</title>
+    <title>HK Clinical Calc v4.1</title>
     <meta name="viewport" content="width=device-width, initial-scale=1, user-scalable=no">
     <meta name="apple-mobile-web-app-capable" content="yes">
     <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
@@ -11,13 +11,13 @@
         .title-bar { text-align: center; font-size: 1.4em; font-weight: bold; color: #0056b3; margin-bottom: 15px; text-transform: uppercase; letter-spacing: 1px; }
         .container { display: flex; flex-wrap: wrap; gap: 15px; }
         .card { background: white; padding: 20px; border-radius: 12px; box-shadow: 0 4px 10px rgba(0,0,0,0.1); flex: 1; min-width: 350px; border-top: 5px solid #0056b3; }
-        .summary-card { width: 100%; background: #e3f2fd; border: 2px solid #0056b3; border-top-width: 5px; margin-top: 20px; }
         h2 { color: #0056b3; margin-top: 0; font-size: 1.1em; text-transform: uppercase; border-bottom: 1px solid #eee; padding-bottom: 8px; }
         label { display: block; margin-top: 10px; font-weight: 600; font-size: 0.8em; color: #666; text-transform: uppercase; }
         input, select { width: 100%; padding: 10px; margin-top: 5px; border: 1px solid #ccc; border-radius: 6px; font-size: 15px; box-sizing: border-box; }
         .mod-section { background: #fffde7; padding: 10px; border-radius: 8px; margin-top: 10px; border: 1px solid #ffe082; }
         .result-box { margin-top: 15px; padding: 15px; background: #f8fbff; border-radius: 8px; border: 1px solid #d1e3f8; }
         .stats { display: flex; justify-content: space-between; margin-bottom: 5px; font-size: 1.05em; }
+        .daily-subtext { font-size: 0.85em; color: #555; border-top: 1px solid #eee; padding-top: 8px; margin-top: 8px; }
         .val { font-weight: bold; }
         .divider { border: 0; border-top: 1px solid #ddd; margin: 12px 0; }
         .alert { color: #d32f2f !important; border-color: #d32f2f !important; font-weight: 900; }
@@ -26,12 +26,6 @@
         .mod-load { font-size: 0.75em; color: #777; margin-top: 8px; font-style: italic; text-align: right; }
         .gir-box { background: #fff3e0; border-left: 5px solid #ff9800; padding: 8px; margin-top: 10px; font-size: 0.9em; }
         .weight-section { width: 100%; margin-bottom: 15px; background: #0056b3; padding: 15px; border-radius: 12px; color: white; }
-        
-        /* Summary Table Styling */
-        table { width: 100%; border-collapse: collapse; margin-top: 10px; background: white; border-radius: 8px; overflow: hidden; }
-        th, td { padding: 12px; text-align: center; border: 1px solid #dee2e6; }
-        th { background: #f1f8ff; color: #0056b3; font-size: 0.85em; text-transform: uppercase; }
-        .total-row { background: #fff9c4; font-weight: bold; }
     </style>
 </head>
 <body>
@@ -111,95 +105,45 @@
         <label>Feeds per Day</label><input type="number" id="l_feeds" value="8" oninput="calculateAll()">
         <div id="l_results"></div>
     </div>
-
-    <div class="card summary-card">
-        <h2>📊 Daily Intake Summary (Daily Totals)</h2>
-        <table>
-            <thead>
-                <tr>
-                    <th>Component</th>
-                    <th>Powder</th>
-                    <th>Liquid</th>
-                    <th>Combined</th>
-                </tr>
-            </thead>
-            <tbody>
-                <tr>
-                    <td>Energy (kcal)</td>
-                    <td id="p_tot_kcal">-</td>
-                    <td id="l_tot_kcal">-</td>
-                    <td id="comb_kcal" style="font-weight:bold;">-</td>
-                </tr>
-                <tr>
-                    <td>Protein (g)</td>
-                    <td id="p_tot_pro">-</td>
-                    <td id="l_tot_pro">-</td>
-                    <td id="comb_pro" style="font-weight:bold;">-</td>
-                </tr>
-                <tr>
-                    <td>Carbs (g)</td>
-                    <td id="p_tot_cho">-</td>
-                    <td id="l_tot_cho">-</td>
-                    <td id="comb_cho" style="font-weight:bold;">-</td>
-                </tr>
-            </tbody>
-        </table>
-    </div>
 </div>
 
 <script>
 function calculateAll() {
     const w = parseFloat(document.getElementById('weight').value) || 1;
 
-    // --- POWDER ---
+    // POWDER
     const pD = document.getElementById('p_formula').value.split(',');
     const p_sc = parseFloat(document.getElementById('p_scoops').value) || 0;
     const p_wa = parseFloat(document.getElementById('p_water').value) || 0;
     const p_fe = parseFloat(document.getElementById('p_feeds').value) || 0;
-    const p_poly_f = parseFloat(document.getElementById('p_poly').value) || 0;
-    const p_fat_f = parseFloat(document.getElementById('p_fat').value) || 0;
+    const p_poly = parseFloat(document.getElementById('p_poly').value) || 0;
+    const p_fat_m = parseFloat(document.getElementById('p_fat').value) || 0;
 
     const p_total_vol = (p_wa + (p_sc * parseFloat(pD[4]) * 0.75)) * p_fe;
     const p_single_vol = p_total_vol / (p_fe > 0 ? p_fe : 1);
     const p_m_total = p_sc * parseFloat(pD[4]) * p_fe;
     
-    let pk = (p_m_total / 100) * parseFloat(pD[0]) + (p_poly_f * 3.8 * p_fe) + (p_fat_f * 4.5 * p_fe);
+    let pk = (p_m_total / 100) * parseFloat(pD[0]) + (p_poly * 3.8 * p_fe) + (p_fat_m * 4.5 * p_fe);
     let pp = (p_m_total / 100) * parseFloat(pD[1]);
-    let pc = (p_m_total / 100) * parseFloat(pD[2]) + (p_poly_f * 0.94 * p_fe);
-    let pf = (p_m_total / 100) * parseFloat(pD[3]) + (p_fat_f * 0.5 * p_fe);
+    let pc = (p_m_total / 100) * parseFloat(pD[2]) + (p_poly * 0.94 * p_fe);
+    let pf = (p_m_total / 100) * parseFloat(pD[3]) + (p_fat_m * 0.5 * p_fe);
 
-    const std_dilution = parseFloat(pD[5]);
-    const p_str = std_dilution / (p_wa / p_sc);
+    renderResult('p_results', pk, pp, p_total_vol, w, (pk/p_total_vol)*29.57, (pc*1000)/(w*1440), pc, pf, parseFloat(pD[5])/(p_wa/p_sc), p_poly, p_fat_m, p_single_vol);
 
-    renderResult('p_results', pk, pp, p_total_vol, w, (pk/p_total_vol)*29.57, (pc*1000)/(w*1440), pc, pf, p_str, p_poly_f, p_fat_f, p_single_vol);
-
-    // --- LIQUID ---
+    // LIQUID
     const lD = document.getElementById('l_formula').value.split(',');
     const lv = parseFloat(document.getElementById('l_vol').value) || 0;
     const lf = parseFloat(document.getElementById('l_feeds').value) || 0;
-    const lp_f = parseFloat(document.getElementById('l_poly').value) || 0;
-    const lf_f = parseFloat(document.getElementById('l_fat').value) || 0;
+    const lp = parseFloat(document.getElementById('l_poly').value) || 0;
+    const lfm = parseFloat(document.getElementById('l_fat').value) || 0;
 
     const l_vol_total = lv * lf;
-    let lk = ((parseFloat(lD[0])/100) * l_vol_total) + (lp_f * 3.8 * lf) + (lf_f * 4.5 * lf);
-    let lp = (parseFloat(lD[1])/100) * l_vol_total;
-    let lc = ((parseFloat(lD[2])/100) * l_vol_total) + (lp_f * 0.94 * lf);
-    let lfat = ((parseFloat(lD[3])/100) * l_vol_total) + (lf_f * 0.5 * lf);
+    let lk = ((parseFloat(lD[0])/100) * l_vol_total) + (lp * 3.8 * lf) + (lfm * 4.5 * lf);
+    let l_pr = (parseFloat(lD[1])/100) * l_vol_total;
+    let lc = ((parseFloat(lD[2])/100) * l_vol_total) + (lp * 0.94 * lf);
+    let lfat = ((parseFloat(lD[3])/100) * l_vol_total) + (lfm * 0.5 * lf);
 
-    renderResult('l_results', lk, lp, l_vol_total, w, (lk/l_vol_total)*29.57, (lc*1000)/(w*1440), lc, lfat, null, lp_f, lf_f, lv);
-
-    // --- SUMMARY TABLE UPDATES ---
-    document.getElementById('p_tot_kcal').innerText = pk.toFixed(0);
-    document.getElementById('l_tot_kcal').innerText = lk.toFixed(0);
-    document.getElementById('comb_kcal').innerText = (pk + lk).toFixed(0);
-
-    document.getElementById('p_tot_pro').innerText = pp.toFixed(1);
-    document.getElementById('l_tot_pro').innerText = lp.toFixed(1);
-    document.getElementById('comb_pro').innerText = (pp + lp).toFixed(1);
-
-    document.getElementById('p_tot_cho').innerText = pc.toFixed(1);
-    document.getElementById('l_tot_cho').innerText = lc.toFixed(1);
-    document.getElementById('comb_cho').innerText = (pc + lc).toFixed(1);
+    renderResult('l_results', lk, l_pr, l_vol_total, w, (lk/l_vol_total)*29.57, (lc*1000)/(w*1440), lc, lfat, null, lp, lfm, lv);
 }
 
 function renderResult(id, kcal, pro, vol, w, oz, gir, cho, fat, str, mp, mf, vf) {
@@ -224,6 +168,12 @@ function renderResult(id, kcal, pro, vol, w, oz, gir, cho, fat, str, mp, mf, vf)
                 <div class="conc-item ${fat_pct > 7 ? 'alert' : ''}" style="color:#388e3c">Fat: ${fat_pct}%</div>
             </div>
             <div class="mod-load">Modular Load: P ${p_l}% | L/C ${f_l}%</div>
+            
+            <div class="daily-subtext">
+                <div class="stats" style="margin-bottom:2px;"><span>Daily Total Energy:</span> <b>${kcal.toFixed(0)} kcal</b></div>
+                <div class="stats" style="margin-bottom:2px;"><span>Daily Total Protein:</span> <b>${pro.toFixed(1)} g</b></div>
+                <div class="stats" style="margin-bottom:0;"><span>Daily Total Carbs:</span> <b>${cho.toFixed(1)} g</b></div>
+            </div>
         </div>
     `;
 }
